@@ -952,3 +952,153 @@ html {
     padding: 0.3rem 0.4rem;
   }
 }
+
+/* ========================================================
+   DATABASE ARCHIVE & TOAST NOTIFICATION STYLES
+   ======================================================== */
+.toast-notify {
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(-30px);
+  background: rgba(13, 27, 58, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--primary-gold);
+  border-radius: 9999px;
+  padding: 0.6rem 1.4rem;
+  color: var(--light-gold);
+  font-size: 0.88rem;
+  font-weight: 500;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast-notify.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.archive-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  max-height: 62vh;
+  overflow-y: auto;
+  padding-right: 0.4rem;
+}
+
+.archive-list-container::-webkit-scrollbar {
+  width: 5px;
+}
+.archive-list-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+.archive-list-container::-webkit-scrollbar-thumb {
+  background: rgba(245, 158, 11, 0.4);
+  border-radius: 4px;
+}
+
+.archive-card {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--glass-border);
+  border-radius: 0.9rem;
+  padding: 0.95rem 1.1rem;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.archive-card:hover {
+  background: rgba(0, 0, 0, 0.45);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.archive-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.archive-card-names {
+  font-weight: 600;
+  color: var(--primary-gold);
+  font-size: 0.95rem;
+}
+
+.archive-card-date {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.archive-card-body {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #e2e8f0;
+  margin-bottom: 0.65rem;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.5rem;
+  border-left: 3px solid var(--primary-gold);
+}
+
+.archive-card-letter {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  font-style: italic;
+  margin-top: 0.35rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  padding-top: 0.35rem;
+}
+
+.archive-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+}
+
+.archive-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--light-gold);
+}
+
+.archive-btn-delete {
+  background: transparent;
+  border: none;
+  color: #f87171;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.2s;
+}
+
+.archive-btn-delete:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.empty-archive {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.8;
+}

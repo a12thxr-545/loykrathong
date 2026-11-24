@@ -1,18 +1,19 @@
 {
-  "name": "loykrathong-for-my-love",
+  "name": "loykrathong-festival",
   "version": "1.0.0",
-  "description": "เว็บลอยกระทงออนไลน์สุดโรแมนติกสำหรับคู่รัก 🌕💖",
-  "main": "index.html",
+  "description": "เว็บประเพณีลอยกระทง วันเพ็ญเดือนสิบสอง พร้อมระบบฐานข้อมูลบันทึกคำอธิษฐาน",
+  "main": "server.js",
   "scripts": {
-    "start": "python3 -m http.server 3000",
-    "serve": "python3 -m http.server 8080"
+    "start": "node server.js",
+    "dev": "node server.js",
+    "static": "python3 -m http.server 3000"
   },
   "keywords": [
     "loykrathong",
-    "romantic",
-    "couple",
-    "web-audio",
-    "canvas"
+    "festival",
+    "thai-culture",
+    "sqlite",
+    "indexeddb"
   ],
   "author": "Arthur",
   "license": "MIT"

@@ -42,6 +42,9 @@
   function init() {
     setupCanvas();
     preloadPhotos();
+    if (window.loyKrathongDB) {
+      window.loyKrathongDB.init();
+    }
     fireworks = new FireworksEngine(riverCanvas);
     generateStars();
     generateInitialLanterns();
@@ -225,9 +228,27 @@
     document.getElementById('btn-go-river').addEventListener('click', () => {
       state.name1 = document.getElementById('input-name1').value.trim() || 'คนที่ 1';
       state.name2 = document.getElementById('input-name2').value.trim() || 'คนที่ 2';
-      state.tagText = document.getElementById('input-tag').value.trim() || 'ลอยกระทงวันเพ็ญ';
+      state.tagText = document.getElementById('input-tag').value.trim() || 'ลอยกระทง ๒๔ พ.ย.';
       state.wish = document.getElementById('input-wish').value.trim() || 'ขอขมาพระแม่คงคา';
       state.secretLetter = document.getElementById('input-letter').value.trim() || 'ประเพณีลอยกระทง';
+
+      // Save wish & message to database!
+      if (window.loyKrathongDB) {
+        window.loyKrathongDB.saveWish({
+          name1: state.name1,
+          name2: state.name2,
+          tagText: state.tagText,
+          wish: state.wish,
+          letter: state.secretLetter,
+          baseType: state.baseType,
+          flowerType: state.flowerType,
+          candleColor: state.candleColor,
+          coinType: state.coinType,
+          isCoupleMode: state.isCoupleMode
+        }).then(() => {
+          showToast('บันทึกคำอธิษฐานลงฐานข้อมูลเรียบร้อยแล้ว');
+        });
+      }
       
       setScreen('river');
 
@@ -370,6 +391,27 @@
       }
     });
 
+    // Database Archive Button
+    const btnArchive = document.getElementById('dock-btn-archive');
+    if (btnArchive) {
+      btnArchive.addEventListener('click', () => {
+        renderArchiveList();
+        openModal('modal-archive');
+        if (window.romanticAudio) window.romanticAudio.playChime(784, 0.15);
+      });
+    }
+
+    // Export Database Button
+    const btnExport = document.getElementById('btn-export-db');
+    if (btnExport) {
+      btnExport.addEventListener('click', () => {
+        if (window.loyKrathongDB) {
+          window.loyKrathongDB.exportJSON();
+          showToast('ส่งออกข้อมูล JSON เรียบร้อยแล้ว');
+        }
+      });
+    }
+
     document.getElementById('dock-btn-edit').addEventListener('click', () => {
       setScreen('customizer');
     });
@@ -449,6 +491,115 @@
     const modal = document.getElementById(id);
     if (modal) modal.classList.remove('open');
   }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast-notify');
+    if (!toast) return;
+    toast.innerHTML = `
+      <svg class="svg-icon" style="color: var(--primary-gold);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 6L9 17l-5-5"/>
+      </svg>
+      <span>${msg}</span>
+    `;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3500);
+  }
+
+  async function renderArchiveList() {
+    const container = document.getElementById('archive-list');
+    const countEl = document.getElementById('archive-count-text');
+    if (!container) return;
+
+    container.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--text-muted);">กำลังโหลดข้อมูลจากฐานข้อมูล...</div>';
+
+    let wishes = [];
+    if (window.loyKrathongDB) {
+      wishes = await window.loyKrathongDB.getAllWishes();
+    }
+
+    if (countEl) {
+      countEl.textContent = `บันทึกในฐานข้อมูลแล้ว ${wishes.length} รายการ`;
+    }
+
+    if (!wishes || wishes.length === 0) {
+      container.innerHTML = `
+        <div class="empty-archive">
+          <p>ยังไม่มีคำอธิษฐานในฐานข้อมูล</p>
+          <small>มาร่วมจัดทำกระทงและปล่อยลงสู่สายน้ำเพื่อบันทึกคำอธิษฐานแรกกันนะ</small>
+        </div>
+      `;
+      return;
+    }
+
+    const baseNames = {
+      'banana-leaf': 'ใบตองพับ',
+      'lotus': 'กลีบบัวหลวง',
+      'bread': 'ขนมปังรักษ์น้ำ',
+      'natural-leaf': 'กาบกล้วยธรรมชาติ',
+      'royal': 'วิจิตรศิลป์'
+    };
+
+    const flowerNames = {
+      'lotus-bud': 'บัวชมพู',
+      'marigold': 'ดาวเรือง',
+      'orchid': 'กล้วยไม้',
+      'jasmine': 'มะลิสด',
+      'mix': 'ดอกไม้รวม'
+    };
+
+    container.innerHTML = wishes.map((item) => {
+      const bName = baseNames[item.baseType] || item.baseType;
+      const fName = flowerNames[item.flowerType] || item.flowerType;
+      const styleDesc = `${bName} • ${fName}`;
+
+      return `
+        <div class="archive-card" id="archive-item-${item.id}">
+          <div class="archive-card-header">
+            <span class="archive-card-names">${escapeHtml(item.name1)} และ ${escapeHtml(item.name2)}</span>
+            <span class="archive-card-date">${escapeHtml(item.formattedTime || '')} ${escapeHtml(item.formattedDate || '')}</span>
+          </div>
+          <div class="archive-card-body">
+            <div>“${escapeHtml(item.wish)}”</div>
+            ${item.letter ? `<div class="archive-card-letter">${escapeHtml(item.letter)}</div>` : ''}
+          </div>
+          <div class="archive-card-footer">
+            <span class="archive-badge">${styleDesc}</span>
+            <button class="archive-btn-delete" onclick="window.deleteWishFromUI('${item.id}')">
+              <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
+                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              <span>ลบ</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  window.deleteWishFromUI = async function(id) {
+    if (confirm('คุณต้องการลบข้อความนี้ออกจากฐานข้อมูลใช่หรือไม่?')) {
+      if (window.loyKrathongDB) {
+        await window.loyKrathongDB.deleteWish(id);
+        const card = document.getElementById(`archive-item-${id}`);
+        if (card) {
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.9)';
+          setTimeout(() => card.remove(), 250);
+        }
+        showToast('ลบข้อความออกจากฐานข้อมูลเรียบร้อยแล้ว');
+      }
+    }
+  };
 
   function openSecretLetter() {
     document.getElementById('letter-subtitle').textContent = `ผู้ร่วมลอยกระทง: ${state.name1} และ ${state.name2}`;
