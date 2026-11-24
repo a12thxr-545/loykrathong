@@ -526,8 +526,17 @@ html {
 }
 
 @keyframes pulseHint {
-  0%, 100% { opacity: 0.95; transform: translateX(-50%) translateY(0); }
-  50% { opacity: 0.65; transform: translateX(-50%) translateY(3px); }
+
+  0%,
+  100% {
+    opacity: 0.95;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    opacity: 0.65;
+    transform: translateX(-50%) translateY(3px);
+  }
 }
 
 /* River Bottom Dock Controls */
@@ -580,6 +589,7 @@ html {
 .dock-btn:hover {
   background: rgba(255, 255, 255, 0.12);
 }
+
 .dock-btn:hover .dock-icon {
   transform: scale(1.15) translateY(-2px);
 }
@@ -592,6 +602,7 @@ html {
   font-weight: 600;
   box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
 }
+
 .dock-btn.highlight .dock-icon {
   color: #1e1b4b;
 }
@@ -705,6 +716,7 @@ html {
   justify-content: center;
   font-size: 1.2rem;
 }
+
 .modal-close:hover {
   background: rgba(255, 255, 255, 0.25);
 }
@@ -773,16 +785,19 @@ html {
    RESPONSIVE QUERIES FOR IPAD / TABLET (768px - 1024px)
    ======================================================== */
 @media (max-width: 1024px) {
+
   /* On iPad portrait & tablets: place pier widget ABOVE the dock to avoid ANY overlap */
   .riverside-pier-widget {
     bottom: calc(5.4rem + env(safe-area-inset-bottom, 0px));
     left: 1rem;
     padding: 0.4rem 0.75rem;
   }
+
   .pier-avatar {
     width: 38px;
     height: 38px;
   }
+
   .pier-speech-bubble {
     font-size: 0.75rem;
   }
@@ -803,6 +818,7 @@ html {
    RESPONSIVE QUERIES FOR MOBILE & SMALL TABLETS (<= 768px)
    ======================================================== */
 @media (max-width: 768px) {
+
   /* Stack customizer into single neat column */
   .customizer-container {
     grid-template-columns: 1fr;
@@ -831,13 +847,16 @@ html {
   .welcome-box {
     padding: 1.8rem 1.2rem;
   }
+
   .welcome-title {
     font-size: 1.7rem;
   }
+
   .welcome-subtitle {
     font-size: 0.88rem;
     margin-bottom: 1.5rem;
   }
+
   .kid-avatar-img {
     width: 62px;
     height: 62px;
@@ -895,9 +914,11 @@ html {
     gap: 0.5rem;
     font-size: 0.8rem;
   }
+
   .festival-badge {
     font-size: 0.8rem;
   }
+
   .river-hint {
     top: calc(3.1rem + env(safe-area-inset-top, 0px));
     font-size: 0.72rem;
@@ -943,10 +964,12 @@ html {
     font-size: 0.58rem;
     padding: 0.22rem 0.28rem;
   }
+
   .dock-btn .dock-icon {
     width: 15px;
     height: 15px;
   }
+
   .river-dock {
     gap: 0.1rem;
     padding: 0.3rem 0.4rem;
