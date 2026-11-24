@@ -16,9 +16,9 @@
     isLit: true,
     name1: 'คนที่ 1',
     name2: 'คนที่ 2',
-    tagText: 'ลอยกระทงวันเพ็ญ',
+    tagText: 'ลอยกระทง ๒๔ พ.ย.',
     wish: 'ขอขมาพระแม่คงคา ขอให้มีความสุขความเจริญ สุขภาพแข็งแรง แคล้วคลาดปลอดภัยจากภยันตรายทั้งปวง',
-    secretLetter: 'ประเพณีลอยกระทง วันเพ็ญเดือน ๑๒ ร่วมลอยกระทงลงสู่สายน้ำเพื่อความเป็นสิริมงคล ขอขมาพระแม่คงคา และขอพรให้มีแต่ความร่มเย็นเป็นสุขในชีวิต',
+    secretLetter: 'ประเพณีลอยกระทง ๒๔ พฤศจิกายน ๒๕๖๙ (วันเพ็ญเดือน ๑๒) ร่วมลอยกระทงลงสู่สายน้ำเพื่อความเป็นสิริมงคล ขอขมาพระแม่คงคา และขอพรให้มีแต่ความร่มเย็นเป็นสุขในชีวิต',
     
     // Photos
     photoBoy: null,
@@ -453,7 +453,7 @@
   function openSecretLetter() {
     document.getElementById('letter-subtitle').textContent = `ผู้ร่วมลอยกระทง: ${state.name1} และ ${state.name2}`;
     document.getElementById('letter-body-text').textContent = state.wish;
-    document.getElementById('letter-signature').textContent = `บันทึกคำอธิษฐานวันเพ็ญเดือน ๑๒ • ${state.name1} และ ${state.name2}`;
+    document.getElementById('letter-signature').textContent = `บันทึกคำอธิษฐาน ๒๔ พฤศจิกายน ๒๕๖๙ (วันขึ้น ๑๕ ค่ำ เดือน ๑๒) • ${state.name1} และ ${state.name2}`;
     openModal('modal-letter');
     if (window.romanticAudio) window.romanticAudio.playChime(950, 0.25);
   }

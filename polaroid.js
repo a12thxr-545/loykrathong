@@ -257,7 +257,7 @@ class PolaroidGenerator {
     ctx.fillStyle = '#64748b';
     const now = new Date();
     const thaiYear = now.getFullYear() + 543;
-    const dateStr = `วันขึ้น ๑๕ ค่ำ เดือน ๑๒ ประจำปี พ.ศ. ${thaiYear}`;
+    const dateStr = `๒๔ พฤศจิกายน ${thaiYear} • วันขึ้น ๑๕ ค่ำ เดือน ๑๒`;
     ctx.fillText(dateStr, width / 2, textStartY + 56);
 
     // Divider Line
@@ -294,8 +294,8 @@ class PolaroidGenerator {
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 9px "Prompt", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('วันเพ็ญ', stampX, stampY - 3);
-    ctx.fillText('เดือน ๑๒', stampX, stampY + 11);
+    ctx.fillText('๒๔ พ.ย.', stampX, stampY - 3);
+    ctx.fillText('๒๕๖๙', stampX, stampY + 11);
     ctx.restore();
 
     return canvas.toDataURL('image/png');
