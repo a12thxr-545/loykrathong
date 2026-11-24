@@ -111,8 +111,13 @@ html {
 }
 
 @keyframes floatCard {
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-6px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  100% {
+    transform: translateY(-6px);
+  }
 }
 
 .welcome-badge {
@@ -753,8 +758,15 @@ html {
 }
 
 @keyframes sparkleUp {
-  0% { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(-140px) scale(0.2); opacity: 0; }
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-140px) scale(0.2);
+    opacity: 0;
+  }
 }
 
 /* ========================================================
