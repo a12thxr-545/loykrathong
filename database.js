@@ -1,7 +1,7 @@
 /**
  * Loy Krathong Database & Storage Engine
- * Hybrid storage: IndexedDB (Client) + REST API / SQLite (Server)
- * Works seamlessly offline, on static hosting (GitHub Pages), or with Node server.
+ * Multi-tier storage: Supabase Cloud + SQLite / Node Server + IndexedDB (Client) + LocalStorage
+ * Works seamlessly online, offline, on GitHub Pages, and with Node server.
  */
 
 class LoyKrathongDB {
@@ -10,23 +10,33 @@ class LoyKrathongDB {
     this.dbVersion = 1;
     this.db = null;
     this.isServerAvailable = false;
+    
+    // Supabase Configuration
+    this.supabaseUrl = 'https://gulhecqxxmxhhtioxgxo.supabase.co';
+    this.supabaseKey = 'sb_publishable_NQcm7PoWsEORk7ECgXTblQ_dU2o8iXR';
+    this.isSupabaseConnected = false;
   }
 
-  // Initialize IndexedDB
+  // Initialize storage providers
   async init() {
-    return new Promise((resolve) => {
-      // Check if server API is reachable
-      fetch('/api/health')
-        .then(res => res.ok ? res.json() : null)
-        .then(data => {
-          if (data && data.status === 'ok') {
-            this.isServerAvailable = true;
-          }
-        })
-        .catch(() => {
-          this.isServerAvailable = false;
-        });
+    // 1. Try to fetch dynamic config from server (if running)
+    try {
+      const res = await fetch('/api/config');
+      if (res.ok) {
+        const config = await res.json();
+        if (config.supabaseUrl) this.supabaseUrl = config.supabaseUrl;
+        if (config.supabasePublishableKey) this.supabaseKey = config.supabasePublishableKey;
+        this.isServerAvailable = true;
+      }
+    } catch (e) {
+      this.isServerAvailable = false;
+    }
 
+    // 2. Test Supabase connection
+    this.testSupabaseConnection();
+
+    // 3. Initialize IndexedDB
+    return new Promise((resolve) => {
       if (!window.indexedDB) {
         resolve(null);
         return;
@@ -52,6 +62,26 @@ class LoyKrathongDB {
         resolve(null);
       };
     });
+  }
+
+  // Check Supabase availability
+  async testSupabaseConnection() {
+    if (!this.supabaseUrl || !this.supabaseKey) return false;
+    try {
+      const res = await fetch(`${this.supabaseUrl}/rest/v1/wishes?select=id&limit=1`, {
+        method: 'GET',
+        headers: {
+          'apikey': this.supabaseKey,
+          'Authorization': `Bearer ${this.supabaseKey}`
+        }
+      });
+      if (res.ok) {
+        this.isSupabaseConnected = true;
+        return true;
+      }
+    } catch (e) {}
+    this.isSupabaseConnected = false;
+    return false;
   }
 
   /**
@@ -83,7 +113,19 @@ class LoyKrathongDB {
       formattedTime: formattedTime
     };
 
-    // 1. Save to IndexedDB
+    // 1. Direct save to Supabase (Cloud Database)
+    this.saveToSupabase(record);
+
+    // 2. Save to Server API (if node server is running, syncs SQLite)
+    try {
+      fetch('/api/wishes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(record)
+      }).catch(() => {});
+    } catch (e) {}
+
+    // 3. Save to local IndexedDB (Client Browser)
     if (this.db) {
       try {
         await new Promise((resolve, reject) => {
@@ -98,16 +140,7 @@ class LoyKrathongDB {
       }
     }
 
-    // 2. Also save to Server API (if server is running)
-    try {
-      fetch('/api/wishes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(record)
-      }).catch(() => {});
-    } catch (e) {}
-
-    // 3. Fallback LocalStorage backup
+    // 4. Fallback LocalStorage backup
     try {
       const existing = JSON.parse(localStorage.getItem('loykrathong_wishes') || '[]');
       existing.unshift(record);
@@ -118,29 +151,68 @@ class LoyKrathongDB {
     return record;
   }
 
+  // Supabase save helper
+  async saveToSupabase(record) {
+    if (!this.supabaseUrl || !this.supabaseKey) return null;
+    try {
+      const res = await fetch(`${this.supabaseUrl}/rest/v1/wishes`, {
+        method: 'POST',
+        headers: {
+          'apikey': this.supabaseKey,
+          'Authorization': `Bearer ${this.supabaseKey}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(record)
+      });
+      if (res.ok) {
+        this.isSupabaseConnected = true;
+        const data = await res.json();
+        return Array.isArray(data) ? data[0] : record;
+      }
+    } catch (e) {
+      console.warn('Supabase save error:', e);
+    }
+    return null;
+  }
+
   /**
    * Fetch all stored wishes/messages
    * @returns {Promise<Array>}
    */
   async getAllWishes() {
-    // 1. Try server first
+    // 1. Try Server API first (handles Supabase + SQLite)
     try {
       const res = await fetch('/api/wishes');
       if (res.ok) {
         const serverData = await res.json();
-        if (Array.isArray(serverData)) {
-          // Sync into IndexedDB
-          if (this.db) {
-            const tx = this.db.transaction('wishes', 'readwrite');
-            const store = tx.objectStore('wishes');
-            serverData.forEach(item => store.put(item));
-          }
+        if (Array.isArray(serverData) && serverData.length > 0) {
+          this.cacheToIndexedDB(serverData);
           return serverData;
         }
       }
     } catch (e) {}
 
-    // 2. Fallback to IndexedDB
+    // 2. Try direct Supabase Cloud query
+    try {
+      if (this.supabaseUrl && this.supabaseKey) {
+        const res = await fetch(`${this.supabaseUrl}/rest/v1/wishes?select=*&order=createdAt.desc`, {
+          headers: {
+            'apikey': this.supabaseKey,
+            'Authorization': `Bearer ${this.supabaseKey}`
+          }
+        });
+        if (res.ok) {
+          const supabaseData = await res.json();
+          if (Array.isArray(supabaseData) && supabaseData.length > 0) {
+            this.cacheToIndexedDB(supabaseData);
+            return supabaseData;
+          }
+        }
+      }
+    } catch (e) {}
+
+    // 3. Fallback to IndexedDB (Client Offline Storage)
     if (this.db) {
       try {
         const idbData = await new Promise((resolve) => {
@@ -152,7 +224,6 @@ class LoyKrathongDB {
         });
 
         if (idbData && idbData.length > 0) {
-          // Sort newest first
           idbData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
           return idbData;
         }
@@ -161,7 +232,7 @@ class LoyKrathongDB {
       }
     }
 
-    // 3. Fallback to LocalStorage
+    // 4. Fallback to LocalStorage
     try {
       const localData = JSON.parse(localStorage.getItem('loykrathong_wishes') || '[]');
       return localData;
@@ -170,11 +241,42 @@ class LoyKrathongDB {
     }
   }
 
+  // Cache list to IndexedDB
+  cacheToIndexedDB(list) {
+    if (!this.db || !Array.isArray(list)) return;
+    try {
+      const tx = this.db.transaction('wishes', 'readwrite');
+      const store = tx.objectStore('wishes');
+      list.forEach(item => {
+        if (item && item.id) store.put(item);
+      });
+    } catch (e) {}
+  }
+
   /**
    * Delete a wish by ID
    * @param {string} id 
    */
   async deleteWish(id) {
+    // 1. Supabase delete
+    if (this.supabaseUrl && this.supabaseKey) {
+      try {
+        fetch(`${this.supabaseUrl}/rest/v1/wishes?id=eq.${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': this.supabaseKey,
+            'Authorization': `Bearer ${this.supabaseKey}`
+          }
+        }).catch(() => {});
+      } catch (e) {}
+    }
+
+    // 2. Server delete
+    try {
+      fetch(`/api/wishes/${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => {});
+    } catch (e) {}
+
+    // 3. IndexedDB delete
     if (this.db) {
       try {
         await new Promise((resolve) => {
@@ -187,12 +289,7 @@ class LoyKrathongDB {
       } catch (e) {}
     }
 
-    // Server delete
-    try {
-      fetch(`/api/wishes/${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => {});
-    } catch (e) {}
-
-    // LocalStorage delete
+    // 4. LocalStorage delete
     try {
       let localData = JSON.parse(localStorage.getItem('loykrathong_wishes') || '[]');
       localData = localData.filter(item => item.id !== id);
