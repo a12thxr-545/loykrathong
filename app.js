@@ -1,6 +1,7 @@
 /**
  * Main Application Orchestrator for Loy Krathong
- * Authentic Thai festival theme, zero emojis, zero love text.
+ * Fully responsive for Mobile, iPad, Tablet, and Desktop.
+ * Zero emojis, authentic Thai festival aesthetic.
  */
 
 (function () {
@@ -47,16 +48,24 @@
     bindEvents();
     startLoop();
 
-    window.addEventListener('resize', () => {
-      setupCanvas();
-      fireworks.resize();
-      generateStars();
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(handleResize, 100);
     });
   }
 
   function setupCanvas() {
     riverCanvas.width = window.innerWidth;
     riverCanvas.height = window.innerHeight;
+  }
+
+  function handleResize() {
+    setupCanvas();
+    if (fireworks) fireworks.resize();
+    generateStars();
+    if (state.screen === 'river') {
+      setupRiverKrathongs();
+    }
   }
 
   function preloadPhotos() {
@@ -75,11 +84,11 @@
 
   function generateStars() {
     state.stars = [];
-    const count = Math.floor((window.innerWidth * window.innerHeight) / 9000);
+    const count = Math.floor((window.innerWidth * window.innerHeight) / 9500);
     for (let i = 0; i < count; i++) {
       state.stars.push({
         x: Math.random() * window.innerWidth,
-        y: Math.random() * (window.innerHeight * 0.65),
+        y: Math.random() * (window.innerHeight * 0.6),
         r: Math.random() * 1.5 + 0.5,
         baseAlpha: Math.random() * 0.7 + 0.3,
         twinkleSpeed: Math.random() * 0.03 + 0.01,
@@ -93,10 +102,10 @@
     for (let i = 0; i < 15; i++) {
       state.lanterns.push({
         x: Math.random() * window.innerWidth,
-        y: Math.random() * (window.innerHeight * 0.5) + 30,
-        vx: (Math.random() - 0.5) * 0.35 + 0.2,
-        vy: -(Math.random() * 0.4 + 0.25),
-        scale: Math.random() * 0.35 + 0.25,
+        y: Math.random() * (window.innerHeight * 0.45) + 30,
+        vx: (Math.random() - 0.5) * 0.35 + 0.18,
+        vy: -(Math.random() * 0.35 + 0.22),
+        scale: Math.random() * 0.3 + 0.22,
         alpha: Math.random() * 0.6 + 0.35,
         text: ''
       });
@@ -118,7 +127,7 @@
       setTimeout(() => {
         const hint = document.getElementById('river-hint');
         if (hint) hint.style.opacity = '0';
-      }, 6000);
+      }, 5000);
 
       if (window.romanticAudio) {
         window.romanticAudio.playWaterSplash();
@@ -126,20 +135,44 @@
     }
   }
 
+  // Calculate dynamic river horizon based on screen aspect ratio
+  function getRiverHorizon(h, w) {
+    const isPortrait = h > w;
+    const isMobile = w < 600;
+    if (isMobile) {
+      return h * 0.58; // 42% river on mobile
+    } else if (isPortrait) {
+      return h * 0.60; // 40% river on iPad portrait
+    } else {
+      return h * 0.66; // 34% river on landscape / desktop
+    }
+  }
+
   function setupRiverKrathongs() {
     state.krathongs = [];
-    const riverY = window.innerHeight * 0.72;
-    const centerX = window.innerWidth * 0.5;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const isMobile = w < 600;
+    const isTablet = w >= 600 && w <= 1024;
+    
+    // Position krathongs in the upper-middle region of the water surface
+    const riverHorizon = getRiverHorizon(h, w);
+    const krathongY = riverHorizon + (h - riverHorizon) * 0.32;
+    const centerX = w * 0.5;
+
+    // Responsive sizing and spacing
+    const krathongScale = isMobile ? 0.88 : (isTablet ? 1.0 : 1.15);
+    const pairSpacing = isMobile ? 48 : (isTablet ? 62 : 72);
 
     if (state.isCoupleMode) {
       // Krathong 1: Person 1 (Boy)
       state.krathongs.push({
-        x: centerX - 65,
-        y: riverY,
-        targetY: riverY,
-        vx: 0.16,
+        x: centerX - pairSpacing,
+        y: krathongY,
+        targetY: krathongY,
+        vx: 0.15,
         vy: 0,
-        scale: 1.05,
+        scale: krathongScale,
         name: state.name1,
         isPartner: false,
         offsetPhase: 0,
@@ -149,12 +182,12 @@
 
       // Krathong 2: Person 2 (Girl)
       state.krathongs.push({
-        x: centerX + 65,
-        y: riverY + 14,
-        targetY: riverY + 14,
-        vx: 0.16,
+        x: centerX + pairSpacing,
+        y: krathongY + (isMobile ? 8 : 12),
+        targetY: krathongY + (isMobile ? 8 : 12),
+        vx: 0.15,
         vy: 0,
-        scale: 1.05,
+        scale: krathongScale,
         name: state.name2,
         isPartner: true,
         offsetPhase: Math.PI * 0.6,
@@ -162,14 +195,14 @@
         photoImage2: null
       });
     } else {
-      // Single Krathong
+      // Single Combined Krathong
       state.krathongs.push({
         x: centerX,
-        y: riverY,
-        targetY: riverY,
-        vx: 0.16,
+        y: krathongY,
+        targetY: krathongY,
+        vx: 0.15,
         vy: 0,
-        scale: 1.35,
+        scale: krathongScale * 1.25,
         name: `${state.name1} และ ${state.name2}`,
         isPartner: false,
         offsetPhase: 0,
@@ -297,18 +330,18 @@
     pierWidget.addEventListener('click', (e) => {
       e.stopPropagation();
       const rect = pierWidget.getBoundingClientRect();
-      spawnFloatingSparkle(rect.left + 40, rect.top);
-      spawnFloatingSparkle(rect.left + 70, rect.top - 10);
+      spawnFloatingSparkle(rect.left + 35, rect.top);
+      spawnFloatingSparkle(rect.left + 65, rect.top - 10);
       if (window.romanticAudio) window.romanticAudio.playChime(784, 0.2);
       if (fireworks) {
-        fireworks.launch(window.innerWidth * 0.25, window.innerHeight * 0.3);
+        fireworks.launch(window.innerWidth * 0.25, window.innerHeight * 0.28);
       }
     });
 
     // River Dock Controls
     document.getElementById('dock-btn-firework').addEventListener('click', () => {
       const x = window.innerWidth * (0.25 + Math.random() * 0.5);
-      const y = window.innerHeight * (0.15 + Math.random() * 0.3);
+      const y = window.innerHeight * (0.15 + Math.random() * 0.25);
       fireworks.launch(x, y);
     });
 
@@ -361,7 +394,7 @@
         }
       }
 
-      if (!clickedKrathong && clickY < window.innerHeight * 0.65) {
+      if (!clickedKrathong && clickY < getRiverHorizon(window.innerHeight, window.innerWidth) + 20) {
         fireworks.launch(clickX, clickY);
         spawnFloatingSparkle(clickX, clickY);
       }
@@ -457,8 +490,8 @@
       x: window.innerWidth * 0.5 + (Math.random() - 0.5) * 100,
       y: window.innerHeight * 0.75,
       vx: (Math.random() - 0.5) * 0.4 + 0.15,
-      vy: -(Math.random() * 0.6 + 0.75),
-      scale: 0.9,
+      vy: -(Math.random() * 0.5 + 0.6),
+      scale: 0.8,
       alpha: 1,
       text: text || ''
     });
@@ -472,13 +505,12 @@
     state.waterRipples.push({
       x: x,
       y: y,
-      r: 10,
-      maxR: 90,
-      alpha: 0.6
+      r: 8,
+      maxR: 80,
+      alpha: 0.55
     });
   }
 
-  // Golden stardust sparkle particle (No emojis)
   function spawnFloatingSparkle(x, y) {
     const spark = document.createElement('div');
     spark.className = 'sparkle-float';
@@ -500,9 +532,9 @@
         drawCustomizerPreview(time);
       }
 
-      if (state.screen === 'river' && Math.random() < 0.004) {
+      if (state.screen === 'river' && Math.random() < 0.003) {
         const fx = window.innerWidth * (0.15 + Math.random() * 0.7);
-        const fy = window.innerHeight * (0.15 + Math.random() * 0.25);
+        const fy = window.innerHeight * (0.15 + Math.random() * 0.22);
         fireworks.launch(fx, fy);
       }
 
@@ -516,6 +548,8 @@
     const w = riverCanvas.width;
     const h = riverCanvas.height;
     const ctx = riverCtx;
+    const isPortrait = h > w;
+    const isMobile = w < 600;
 
     ctx.clearRect(0, 0, w, h);
 
@@ -542,10 +576,10 @@
       ctx.fill();
     });
 
-    // 3. Full Moon
-    const moonX = w * 0.82;
-    const moonY = h * 0.2;
-    const moonR = Math.min(54, w * 0.07);
+    // 3. Full Moon (Scales gracefully on mobile and iPad)
+    const moonX = isMobile ? w * 0.76 : (isPortrait ? w * 0.8 : w * 0.82);
+    const moonY = isMobile ? h * 0.16 : (isPortrait ? h * 0.17 : h * 0.2);
+    const moonR = isMobile ? 38 : (isPortrait ? 46 : 54);
 
     const haloGrad = ctx.createRadialGradient(moonX, moonY, moonR * 0.6, moonX, moonY, moonR * 3);
     haloGrad.addColorStop(0, 'rgba(255, 245, 210, 0.4)');
@@ -572,27 +606,30 @@
     ctx.arc(moonX + moonR * 0.35, moonY + moonR * 0.3, moonR * 0.28, 0, Math.PI * 2);
     ctx.fill();
 
-    // 4. Shoreline & Pagoda
-    const riverY = h * 0.68;
+    // 4. Shoreline & Pagoda (Calculated from dynamic river horizon)
+    const riverY = getRiverHorizon(h, w);
     ctx.fillStyle = '#060d1b';
     ctx.beginPath();
     ctx.moveTo(0, riverY);
-    const pagX = w * 0.28;
-    ctx.lineTo(pagX - 60, riverY - 12);
-    ctx.lineTo(pagX - 25, riverY - 18);
-    ctx.lineTo(pagX, riverY - 80);
-    ctx.lineTo(pagX + 25, riverY - 18);
-    ctx.lineTo(pagX + 60, riverY - 12);
-    ctx.lineTo(w, riverY - 15);
+    const pagX = w * (isMobile ? 0.22 : 0.28);
+    const pagH = isMobile ? 55 : 80;
+    ctx.lineTo(pagX - (isMobile ? 40 : 60), riverY - 10);
+    ctx.lineTo(pagX - (isMobile ? 18 : 25), riverY - 16);
+    ctx.lineTo(pagX, riverY - pagH);
+    ctx.lineTo(pagX + (isMobile ? 18 : 25), riverY - 16);
+    ctx.lineTo(pagX + (isMobile ? 40 : 60), riverY - 10);
+    ctx.lineTo(w, riverY - 14);
     ctx.lineTo(w, riverY);
     ctx.closePath();
     ctx.fill();
 
-    for (let i = 0; i < 28; i++) {
-      const lx = (w * 0.12) + i * (w * 0.028);
-      const ly = riverY - 12 + Math.sin(i * 0.8) * 6;
+    // Shoreline lights
+    const lightsCount = isMobile ? 18 : 28;
+    for (let i = 0; i < lightsCount; i++) {
+      const lx = (w * 0.08) + i * (w * (isMobile ? 0.05 : 0.032));
+      const ly = riverY - 10 + Math.sin(i * 0.8) * 5;
       ctx.beginPath();
-      ctx.arc(lx, ly, 2.2, 0, Math.PI * 2);
+      ctx.arc(lx, ly, isMobile ? 1.8 : 2.2, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(255, 215, 0, 0.85)';
       ctx.shadowColor = '#ffd166';
       ctx.shadowBlur = 8;
@@ -611,12 +648,13 @@
     ctx.fillStyle = waterGrad;
     ctx.fillRect(0, riverY, w, h - riverY);
 
-    for (let y = riverY + 10; y < h; y += 14) {
+    // Water Moon Reflection
+    for (let y = riverY + 8; y < h; y += (isMobile ? 16 : 14)) {
       const prog = (y - riverY) / (h - riverY);
-      const rw = 25 + prog * 95;
+      const rw = (isMobile ? 18 : 25) + prog * (isMobile ? 65 : 95);
       const wobble = Math.sin(time * 0.002 + y * 0.05) * 8;
       ctx.beginPath();
-      ctx.ellipse(moonX + wobble, y, rw, 2.5, 0, 0, Math.PI * 2);
+      ctx.ellipse(moonX + wobble, y, rw, isMobile ? 2.0 : 2.5, 0, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(255, 235, 150, ${0.35 - prog * 0.22})`;
       ctx.fill();
     }
@@ -651,7 +689,7 @@
       lt.x += Math.sin(time * 0.0015 + i) * 0.3;
 
       if (lt.y < -50) {
-        lt.y = riverCanvas.height * 0.65;
+        lt.y = riverCanvas.height * 0.55;
         lt.x = Math.random() * riverCanvas.width;
       }
 
@@ -697,7 +735,6 @@
   }
 
   function updateAndDrawKrathongs(ctx, time) {
-    // Traditional Garland String connecting the two krathongs
     if (state.krathongs.length >= 2) {
       const k1 = state.krathongs[0];
       const k2 = state.krathongs[1];
@@ -712,7 +749,6 @@
       ctx.setLineDash([3, 3]);
       ctx.stroke();
 
-      // Golden bead in center
       ctx.beginPath();
       ctx.arc(midX, midY, 3, 0, Math.PI * 2);
       ctx.fillStyle = '#ffd166';
