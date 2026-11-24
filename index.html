@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ประเพณีลอยกระทง วันเพ็ญเดือนสิบสอง</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Fullscreen Interactive River & Night Sky Canvas -->
+  <canvas id="river-canvas"></canvas>
+
+  <div id="ui-container">
+
+    <!-- Screen 1: Welcome Screen -->
+    <div id="screen-welcome" class="screen active interactive">
+      <div class="glass-panel welcome-box">
+        <div class="welcome-badge">
+          <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <span>วันเพ็ญเดือนสิบสอง</span>
+        </div>
+        
+        <!-- Kids Avatars Row (Clean, no emojis) -->
+        <div class="welcome-kids-row">
+          <div class="kid-avatar-wrap">
+            <img src="assets/boy.jpg" alt="เด็กชาย" class="kid-avatar-img">
+            <span class="kid-avatar-tag">คนที่ 1</span>
+          </div>
+          <div class="kids-connector-badge">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </div>
+          <div class="kid-avatar-wrap">
+            <img src="assets/girl.jpg" alt="เด็กหญิง" class="kid-avatar-img">
+            <span class="kid-avatar-tag">คนที่ 2</span>
+          </div>
+        </div>
+
+        <h1 class="welcome-title">ประเพณีลอยกระทง</h1>
+        <p class="welcome-subtitle">
+          ร่วมลอยกระทงลงสู่สายน้ำในคืนวันเพ็ญ<br>
+          ขอขมาพระแม่คงคา และอธิษฐานขอพรเพื่อความเป็นสิริมงคล
+        </p>
+        <button id="btn-start-create" class="btn-primary">
+          <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          <span>เริ่มจัดทำกระทง</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Screen 2: Krathong Customizer -->
+    <div id="screen-customizer" class="screen interactive">
+      <div class="customizer-container">
+        
+        <!-- Left: Live Preview Canvas -->
+        <div class="glass-panel preview-card">
+          <div class="welcome-badge" style="margin-bottom: 0.5rem;">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <span>กระทงที่จัดเตรียม</span>
+          </div>
+          <div class="preview-canvas-wrapper">
+            <canvas id="preview-canvas" width="320" height="300"></canvas>
+          </div>
+          <div style="margin-top: 1rem; display: flex; gap: 0.6rem;">
+            <button id="btn-preview-light" class="btn-secondary" style="padding: 0.5rem 1.2rem; font-size: 0.88rem;">
+              <svg class="svg-icon" id="preview-light-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+              </svg>
+              <span id="preview-light-text">จุดเทียน</span>
+            </button>
+            <button id="btn-preview-mode" class="btn-secondary" style="padding: 0.5rem 1.2rem; font-size: 0.88rem;">
+              <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="7" width="9" height="13" rx="2"/>
+                <rect x="13" y="7" width="9" height="13" rx="2"/>
+              </svg>
+              <span id="preview-mode-text">สลับเป็นกระทงเดี่ยว</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Customizer Tabs & Inputs -->
+        <div class="glass-panel" style="padding: 1.8rem;">
+          
+          <!-- Navigation Tabs -->
+          <div class="tabs-nav">
+            <button class="tab-btn active" data-tab="tab-style">รูปแบบกระทง</button>
+            <button class="tab-btn" data-tab="tab-couple">รูปถ่ายและชื่อ</button>
+            <button class="tab-btn" data-tab="tab-wish">คำอธิษฐาน</button>
+          </div>
+
+          <!-- Tab 1: Style & Flowers -->
+          <div id="tab-style" class="tab-content">
+            <div class="option-group">
+              <label class="option-label">รูปแบบฐานกระทง</label>
+              <div class="option-grid" id="grid-base">
+                <div class="option-item selected" data-val="banana-leaf">
+                  <span class="text-icon">ใบตอง</span>
+                  <span class="name">ใบตองพับ</span>
+                </div>
+                <div class="option-item" data-val="lotus">
+                  <span class="text-icon">ดอกบัว</span>
+                  <span class="name">กลีบบัวหลวง</span>
+                </div>
+                <div class="option-item" data-val="bread">
+                  <span class="text-icon">ขนมปัง</span>
+                  <span class="name">ขนมปังรักษ์น้ำ</span>
+                </div>
+                <div class="option-item" data-val="natural-leaf">
+                  <span class="text-icon">กาบกล้วย</span>
+                  <span class="name">กาบกล้วยธรรมชาติ</span>
+                </div>
+                <div class="option-item" data-val="royal">
+                  <span class="text-icon">วิจิตรศิลป์</span>
+                  <span class="name">กลีบผกาทอง</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="option-group">
+              <label class="option-label">ดอกไม้บูชา</label>
+              <div class="option-grid" id="grid-flower">
+                <div class="option-item selected" data-val="lotus-bud">
+                  <span class="text-icon">บัวตูม</span>
+                  <span class="name">บัวชมพู</span>
+                </div>
+                <div class="option-item" data-val="marigold">
+                  <span class="text-icon">ดาวเรือง</span>
+                  <span class="name">ดาวเรือง</span>
+                </div>
+                <div class="option-item" data-val="orchid">
+                  <span class="text-icon">กล้วยไม้</span>
+                  <span class="name">กล้วยไม้</span>
+                </div>
+                <div class="option-item" data-val="jasmine">
+                  <span class="text-icon">มะลิ</span>
+                  <span class="name">มะลิสด</span>
+                </div>
+                <div class="option-item" data-val="mix">
+                  <span class="text-icon">รวมดอก</span>
+                  <span class="name">ดอกไม้รวม</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="option-group">
+              <label class="option-label">เหรียญตามประเพณี</label>
+              <div class="option-grid" id="grid-coin">
+                <div class="option-item selected" data-val="gold">
+                  <span class="text-icon">เหรียญทอง</span>
+                  <span class="name">เหรียญทอง</span>
+                </div>
+                <div class="option-item" data-val="silver">
+                  <span class="text-icon">เหรียญเงิน</span>
+                  <span class="name">เหรียญเงิน</span>
+                </div>
+                <div class="option-item" data-val="none">
+                  <span class="text-icon">ไม่ใส่</span>
+                  <span class="name">ไม่ใส่เหรียญ</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Photos & Names -->
+          <div id="tab-couple" class="tab-content" style="display: none;">
+            <div class="option-group">
+              <label class="option-label">รูปถ่ายผู้ร่วมลอยกระทง (ติดบนกระทง)</label>
+              <div class="dual-photo-grid">
+                <div class="photo-slot" onclick="document.getElementById('input-photo-boy').click()">
+                  <img id="preview-slot-boy" src="assets/boy.jpg" alt="คนที่ 1" class="slot-img-preview">
+                  <span class="slot-label">คนที่ 1 (เด็กชาย)</span>
+                  <span class="slot-hint">คลิกเพื่อเปลี่ยนรูป</span>
+                  <input type="file" id="input-photo-boy" accept="image/*" style="display: none;">
+                </div>
+                <div class="photo-slot" onclick="document.getElementById('input-photo-girl').click()">
+                  <img id="preview-slot-girl" src="assets/girl.jpg" alt="คนที่ 2" class="slot-img-preview">
+                  <span class="slot-label">คนที่ 2 (เด็กหญิง)</span>
+                  <span class="slot-hint">คลิกเพื่อเปลี่ยนรูป</span>
+                  <input type="file" id="input-photo-girl" accept="image/*" style="display: none;">
+                </div>
+              </div>
+            </div>
+
+            <div class="option-group">
+              <label class="option-label">ชื่อผู้ร่วมลอยกระทง</label>
+              <div class="input-row">
+                <div>
+                  <input type="text" id="input-name1" class="input-field" placeholder="ชื่อคนที่ 1" value="คนที่ 1">
+                </div>
+                <div>
+                  <input type="text" id="input-name2" class="input-field" placeholder="ชื่อคนที่ 2" value="คนที่ 2">
+                </div>
+              </div>
+            </div>
+
+            <div class="option-group">
+              <label class="option-label">ข้อความป้ายบนกระทง</label>
+              <input type="text" id="input-tag" class="input-field" placeholder="ข้อความบนป้าย" value="ลอยกระทงวันเพ็ญ">
+            </div>
+          </div>
+
+          <!-- Tab 3: Wish & Blessings -->
+          <div id="tab-wish" class="tab-content" style="display: none;">
+            <div class="option-group">
+              <label class="option-label">คำอธิษฐานขอขมาและขอพร</label>
+              <textarea id="input-wish" class="input-field" rows="3" placeholder="เขียนคำอธิษฐาน...">ขอขมาพระแม่คงคา ขอให้มีความสุขความเจริญ สุขภาพแข็งแรง แคล้วคลาดปลอดภัยจากภยันตรายทั้งปวง</textarea>
+              
+              <div class="wish-chips">
+                <span class="wish-chip" data-wish="ขอขมาพระแม่คงคา ขอให้มีแต่ความร่มเย็นเป็นสุขในชีวิต">ขอขมาพระแม่คงคา</span>
+                <span class="wish-chip" data-wish="ขอให้ความทุกข์โศกโรคภัยลอยไปกับสายน้ำ เหลือไว้แต่สิ่งดีงาม">ลอยเคราะห์ลอยโศก</span>
+                <span class="wish-chip" data-wish="ขอพรให้สุขภาพร่างกายแข็งแรง ประสบความสำเร็จในหน้าที่การงาน">สุขภาพแข็งแรง</span>
+                <span class="wish-chip" data-wish="ขอให้ครอบครัวมีความสุข ความเจริญรุ่งเรือง และความสงบสุข">ครอบครัวมีความสุข</span>
+              </div>
+            </div>
+
+            <div class="option-group">
+              <label class="option-label">ข้อความบันทึกประจำปี</label>
+              <textarea id="input-letter" class="input-field" rows="3" placeholder="ข้อความที่ต้องการบันทึกไว้...">ประเพณีลอยกระทง วันเพ็ญเดือน ๑๒ ร่วมลอยกระทงลงสู่สายน้ำเพื่อความเป็นสิริมงคล</textarea>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="margin-top: 1.5rem; display: flex; gap: 0.8rem;">
+            <button id="btn-back-welcome" class="btn-secondary" style="flex: 0.4;">
+              ย้อนกลับ
+            </button>
+            <button id="btn-go-river" class="btn-primary" style="flex: 1;">
+              <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 12h20M12 2l10 10-10 10"/>
+              </svg>
+              <span>ปล่อยกระทงลงน้ำ</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Screen 3: River Floating Experience -->
+    <div id="screen-river" class="screen">
+      
+      <!-- Top Status & Audio Bar -->
+      <div class="river-top-bar">
+        <div class="festival-badge">
+          <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <span id="river-names-header">วันเพ็ญเดือนสิบสอง</span>
+        </div>
+        <button id="btn-toggle-music" class="btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.82rem; border-radius: 9999px;">
+          <svg class="svg-icon" id="music-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+          </svg>
+          <span id="music-label">เสียงดนตรีบรรเลง</span>
+        </button>
+      </div>
+
+      <!-- Floating Hint -->
+      <div id="river-hint" class="river-hint">
+        <span>แตะท้องฟ้าเพื่อจุดพลุฉลอง | แตะที่กระทงเพื่ออ่านคำอธิษฐาน</span>
+      </div>
+
+      <!-- Riverside Pier Widget (Two Kids by the River) -->
+      <div id="pier-widget" class="riverside-pier-widget">
+        <img src="assets/boy.jpg" alt="คนที่ 1" class="pier-avatar">
+        <span class="pier-separator"></span>
+        <img src="assets/girl.jpg" alt="คนที่ 2" class="pier-avatar">
+        <div class="pier-speech-bubble">
+          <div>ลอยกระทงด้วยกัน</div>
+          <small style="color: var(--text-muted); font-size: 0.72rem;">(คลิกเพื่อฉลอง)</small>
+        </div>
+      </div>
+
+      <!-- Bottom Dock Controls (Zero emojis, all clean SVGs) -->
+      <div class="river-dock">
+        <button class="dock-btn highlight" id="dock-btn-firework">
+          <svg class="svg-icon dock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </svg>
+          <span>จุดพลุ</span>
+        </button>
+        <button class="dock-btn" id="dock-btn-lantern">
+          <svg class="svg-icon dock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 2h8v4H8zM6 6h12v12H6zM8 18h8v4H8zM12 10v4"/>
+          </svg>
+          <span>ปล่อยโคม</span>
+        </button>
+        <button class="dock-btn" id="dock-btn-letter">
+          <svg class="svg-icon dock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          <span>คำอธิษฐาน</span>
+        </button>
+        <button class="dock-btn" id="dock-btn-polaroid">
+          <svg class="svg-icon dock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          <span>ภาพที่ระลึก</span>
+        </button>
+        <button class="dock-btn" id="dock-btn-relight">
+          <svg class="svg-icon dock-icon" id="dock-candle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+          </svg>
+          <span>จุดเทียน</span>
+        </button>
+        <button class="dock-btn" id="dock-btn-edit">
+          <svg class="svg-icon dock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+          <span>ปรับแต่ง</span>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Modal 1: Wish & Blessing Display -->
+  <div id="modal-letter" class="modal-overlay">
+    <div class="modal-content glass-panel" style="background: transparent; border: none; box-shadow: none;">
+      <button class="modal-close" data-close="modal-letter">&times;</button>
+      <div class="wax-envelope">
+        <div class="wax-seal">
+          <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </div>
+        <div style="text-align: center; margin-bottom: 1rem;">
+          <h2 style="font-family: 'Prompt', sans-serif; color: #92400e; font-size: 1.4rem;">คำอธิษฐานวันเพ็ญเดือนสิบสอง</h2>
+          <div style="font-size: 0.95rem; color: #78716c;" id="letter-subtitle">ประเพณีลอยกระทง</div>
+        </div>
+        <p id="letter-body-text" style="white-space: pre-wrap; margin-bottom: 1.5rem; line-height: 1.8;">
+          ขอขมาพระแม่คงคา...
+        </p>
+        <div style="text-align: right; border-top: 1px dashed #e7e5e4; padding-top: 0.8rem; font-size: 0.92rem; color: #57534e;" id="letter-signature">
+          วันขึ้น ๑๕ ค่ำ เดือน ๑๒
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Release Sky Lantern -->
+  <div id="modal-lantern" class="modal-overlay">
+    <div class="modal-content glass-panel">
+      <button class="modal-close" data-close="modal-lantern">&times;</button>
+      <div style="text-align: center; margin-bottom: 1.2rem;">
+        <svg class="svg-icon" style="width: 36px; height: 36px; color: var(--primary-gold);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M8 2h8v4H8zM6 6h12v12H6zM8 18h8v4H8zM12 10v4"/>
+        </svg>
+        <h2 style="color: var(--primary-gold); margin-top: 0.4rem; font-size: 1.3rem;">ปล่อยโคมลอยสู่ฟ้า</h2>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">อธิษฐานขอพรให้ลอยขึ้นสู่ท้องฟ้า</p>
+      </div>
+      <div class="option-group">
+        <input type="text" id="lantern-wish-input" class="input-field" placeholder="ข้อความบนโคมลอย..." value="ขอให้ชีวิตมีความสุข ความเจริญรุ่งเรือง">
+      </div>
+      <button id="btn-confirm-lantern" class="btn-primary" style="width: 100%;">
+        <span>ปล่อยโคมลอย</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal 3: Polaroid Keepsake & Download -->
+  <div id="modal-polaroid" class="modal-overlay">
+    <div class="modal-content glass-panel" style="max-width: 520px; text-align: center;">
+      <button class="modal-close" data-close="modal-polaroid">&times;</button>
+      <div style="margin-bottom: 1rem;">
+        <h2 style="color: var(--primary-gold); font-size: 1.3rem;">ภาพที่ระลึกวันลอยกระทง</h2>
+        <p style="font-size: 0.88rem; color: var(--text-muted);">ภาพบันทึกความทรงจำประเพณีลอยกระทง</p>
+      </div>
+      <img id="polaroid-img" class="polaroid-preview-img" alt="Keepsake">
+      <div style="display: flex; gap: 0.8rem; justify-content: center;">
+        <a id="btn-download-polaroid" class="btn-primary" download="loy-krathong.png" style="text-decoration: none;">
+          <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          <span>บันทึกภาพลงเครื่อง</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="audio.js"></script>
+  <script src="krathong-art.js"></script>
+  <script src="fireworks.js"></script>
+  <script src="polaroid.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

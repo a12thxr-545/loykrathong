@@ -1,0 +1,19 @@
+{
+  "name": "loykrathong-for-my-love",
+  "version": "1.0.0",
+  "description": "เว็บลอยกระทงออนไลน์สุดโรแมนติกสำหรับคู่รัก 🌕💖",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 3000",
+    "serve": "python3 -m http.server 8080"
+  },
+  "keywords": [
+    "loykrathong",
+    "romantic",
+    "couple",
+    "web-audio",
+    "canvas"
+  ],
+  "author": "Arthur",
+  "license": "MIT"
+}
